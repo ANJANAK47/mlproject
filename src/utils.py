@@ -17,25 +17,25 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
     try:
         report = {}
         best_params = {}
-
         for name, model in models.items():
             grid = param.get(name, None)
-
             if grid and len(grid) > 0:
-                gs = GridSearchCV(model, grid, cv=3, n_jobs=-1)
+                gs = GridSearchCV(model, grid, cv=3, n_jobs=-1, scoring="r2")
                 gs.fit(X_train, y_train)
                 model.set_params(**gs.best_params_)
                 best_params[name] = gs.best_params_
             else:
                 best_params[name] = {}
-
             model.fit(X_train, y_train)
-
             y_test_pred = model.predict(X_test)
-            test_score = r2_score(y_test, y_test_pred)
-
-            report[name] = test_score
-
+            report[name] = r2_score(y_test, y_test_pred)
         return report, best_params
+    except Exception as e:
+        raise CustomException(e, sys)
+
+def load_object(file_path):   # <-- exact name, no extra indent
+    try:
+        with open(file_path, "rb") as f:
+            return dill.load(f)
     except Exception as e:
         raise CustomException(e, sys)
